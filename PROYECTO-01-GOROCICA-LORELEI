@@ -1,0 +1,808 @@
+from lifestore_file import lifestore_products, lifestore_sales, lifestore_searches
+from collections import Counter
+
+#Se solicita al programa pedir un usuario y contraseña para poder acceder al reporte:
+
+Usuario = 'Lore'
+Contra = 'gola'
+intentos = 3 
+
+while True:
+  if intentos == 0:
+    exit()
+  user_name = input('Ingrese su usuario:')
+  password = input('Ingrese su password :')
+
+  if password == Contra and user_name == Usuario:
+      break
+
+  else:
+    intentos = intentos - 1
+    print(f'\n !!Usuario/Contraseña incorrecto(s), {intentos} restantes !!\n') 
+ 
+#Se busca el total anual de ventas:
+
+productos_vendidos = []
+
+for venta in lifestore_sales:
+ refounds = venta [4]
+ productos = venta [1]
+ productos_vendidos.append(productos)
+ if refounds == 1:
+  productos_vendidos.remove(productos)
+ 
+contar = Counter(productos_vendidos)
+lista = list(contar.items())
+
+ventas_totales = []
+
+for n in range(len(lista)):
+   id_producto = lista [n][0]
+   ventas = lista [n][1]
+   precio_producto = lifestore_products[id_producto - 1][2]
+   total_ingreso = ventas * precio_producto
+   ventas_totales.append(total_ingreso)
+   suma = sum(ventas_totales)
+ 
+print("\nTOTAL ANUAL DE VENTAS: $", suma)
+
+#Se busca que el código genere los datos mensuales:
+
+print ("\nNUMERO DE VENTAS MENSUALES\n")
+
+ventas = []
+for sale in lifestore_sales:
+    refund = sale[4]
+    if refund == 1:
+        continue
+    else:
+        ventas.append(sale)
+
+meses = [
+    '/01/', '/02/', '/03/', '/04/', '/05/', '/06/',
+    '/07/', '/08/', '/09/', '/10/', '/11/', '/12/'
+    ]
+    
+ventas_por_mes = []
+for mes in meses:
+    lista_vacia = []
+    ventas_por_mes.append(lista_vacia)
+
+for venta in ventas:
+    id_venta = venta[0]
+    fecha = venta[3]
+
+    contador_de_mes = 0
+
+    for mes in meses:
+        if mes in fecha:
+            ventas_por_mes[contador_de_mes].append(id_venta)
+            continue
+        contador_de_mes = contador_de_mes + 1 
+
+contador_de_mes = 0
+for venta_mensual in ventas_por_mes:
+    print(f'En el mes de {meses[contador_de_mes]} hubo {len(venta_mensual)} ventas')
+    contador_de_mes = contador_de_mes + 1
+
+#Determinar los meses con mayores ventas:
+
+print( "\nMESES CON MAS VENTAS:\n")
+
+num_ventas = []
+for mes in ventas_por_mes:
+  ventas = len(mes)
+  num_ventas.append(ventas)
+
+contador_de_mes = 0
+venta_mes = []
+for num in num_ventas:
+  ventas_mes = num, meses[contador_de_mes]
+  contador_de_mes = contador_de_mes + 1
+  venta_mes.append(ventas_mes)
+  venta_mes.sort(reverse = True)
+
+venta_mes = venta_mes[0:5]
+
+for ventas in venta_mes:
+ 
+ print(ventas)
+
+#Se cuentan los ingresos mensuales apartir de las ventas mensuales reportadas:
+
+print("\n TOTAL DE INGRESOS MENSUALES:\n")
+
+ganancias_mensuales = []
+for venta_mensual in ventas_por_mes:
+    ganancia_del_mes = 0
+    for id_venta in venta_mensual:
+        indice_de_venta = id_venta - 1
+        info_de_venta = lifestore_sales[indice_de_venta]
+        id_prod = info_de_venta[1]
+        indice_de_prod = id_prod - 1
+        info_del_prod = lifestore_products[indice_de_prod]
+        precio_de_prod = info_del_prod[2]
+        ganancia_del_mes = ganancia_del_mes + precio_de_prod
+    ganancias_mensuales.append(ganancia_del_mes)
+
+contador_de_mes = 0
+ganancias_mes = []
+for ganancia in ganancias_mensuales:
+  ganancias = ganancia, meses[contador_de_mes]
+  contador_de_mes = contador_de_mes + 1
+  ganancias_mes.append(ganancias)
+
+for ganancia in ganancias_mes:
+ 
+ print(ganancia)
+
+#Se buscan los productos con mayores busquedas:
+
+print ("\nPRODUCTOS CON MAYORES BUSQUEDAS:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+num_busquedas = busquedas
+contar = Counter(num_busquedas)
+mas_buscados = contar.most_common(10)
+
+for n in range(len(mas_buscados)):
+  id_producto = mas_buscados [n][0]
+  nombre_producto = lifestore_products[id_producto - 1][1]
+  busquedas = mas_buscados [n][1]
+  print(nombre_producto [:40] ,",", "busquedas:", busquedas)
+
+#Se buscan los productos con mayores ventas:
+
+print ("\nPRODUCTOS CON MAYORES VENTAS:\n")
+
+producto = []
+for venta in lifestore_sales:
+ id = venta [1]
+ productos = id
+ producto.append(productos)
+
+num_ventas = producto
+contador = Counter(num_ventas)
+mas_comunes = contador.most_common(5)
+
+for n in range(len(mas_comunes)):
+  id_producto = mas_comunes [n][0]
+  nombre_producto = lifestore_products[id_producto - 1][1]
+  ventas = mas_comunes [n][1]
+  print(nombre_producto [:20] ,",", "ventas:", ventas)
+
+#Se buscan los productos con mejores reseñas:
+
+print("\n5 PRODUCTOS CON MEJORES RESEÑAS:\n")
+
+prod_reviews = []
+for prod in lifestore_products:
+  id_prod = prod[0]
+  sublista = [id_prod, 0, 0]
+  prod_reviews.append(sublista)
+
+for venta in lifestore_sales:
+  id_prod = venta[1]
+  review = venta[2]
+
+  indice = id_prod - 1
+  prod_reviews[indice][1] += review
+  prod_reviews[indice][2] += 1
+
+mejores_calificados = []
+
+for indice, lista in enumerate(prod_reviews):
+  suma = lista[1]
+  cant = lista[2]
+  if cant > 0:
+    calf_prom = suma / cant
+    prod_reviews[indice][1] = calf_prom
+
+peores_calificados = []
+for lista in prod_reviews:
+     sublista = [lista[1], lista[0]]
+     mejores_calificados.append(sublista)
+     if lista[2] > 0:
+      peores_calificados.append(sublista) 
+      
+peores_calificados.sort()
+mejores_calificados.sort(reverse = True)
+
+mejores_scores = []
+for rev in mejores_calificados[:18]:
+  mejores_scores.append(rev)
+
+for  n in mejores_scores:
+  id_producto = n[1]
+  nombre_producto = lifestore_products[id_producto - 1][1]
+  score = n[0]
+  print(nombre_producto [:40] ,",", "review promedio:", score)
+
+#Se buscan los productos con peores reseñas:
+
+print("\n5 PRODUCTOS CON PEORES RESEÑAS:\n")
+
+peores_scores = []
+for rev in peores_calificados[:5]:
+  peores_scores.append(rev)
+
+for  n in peores_scores:
+  id_producto = n[1]
+  nombre_producto = lifestore_products[id_producto - 1][1]
+  score = n[0]
+  print(nombre_producto [:40] ,",", "review promedio:", score)
+
+#Código para ver las categorias:
+
+for n in lifestore_products:
+  categorias = n[3]
+
+#Código para menos busquedas por categoria:
+
+print("\n10 PRODUCTOS MENOS BUSCADOS POR CATEGORIA:\n")
+
+print("\nBusquedas de discos duros:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'discos duros'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+
+combinada.sort()
+
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de procesadores:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'procesadores'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de tarjetas de video:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'tarjetas de video'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de tarjetas madre:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'tarjetas madre'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de pantallas:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'pantallas'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de bocinas:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'bocinas'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+print("\nBusquedas de audifonos:\n")
+
+busquedas  = []
+
+for n in lifestore_searches:
+  nombre = n[1]
+  busquedas.append(nombre)
+
+categoria_buscada = 'audifonos'
+
+categoria_discos_duros = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+
+productos = []
+
+for id in categoria_discos_duros:
+  producto = id[0]
+  productos.append(producto)
+
+suma = []
+
+for n in productos:
+  conteo = busquedas.count(n)
+  suma.append(conteo) 
+
+combinada = list(zip(suma,productos))
+combinada.sort()
+menos_buscados = combinada[0:10]
+
+for n in range(len(menos_buscados)):
+ id_producto = menos_buscados [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ busquedas = menos_buscados [n][0]
+ print(nombre_producto [:45] ,",", "busquedas:", busquedas)
+
+#Código para buscar los productos menos vendidos por categoria:
+
+print("\n5 PRODUCTOS MENOS VENDIDOS POR CATEGORIA\n")
+
+print("5 menos vendidos en la categoria discos duros:")
+
+productos_vendidos = []
+
+for venta in lifestore_sales:
+ fecha_venta = venta[3]
+ id = venta [1]
+ productos_vendidos.append(id)
+
+categoria_buscada = 'discos duros'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:7]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+
+
+print("\n5 menos vendidos en la categoria procesadores:\n")
+
+categoria_buscada = 'procesadores'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+
+
+print("\n5 menos vendidos en la categoria tarjetas de video:\n")
+
+categoria_buscada = 'tarjetas de video'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+
+print("\n5 menos vendidos en la categoria tarjetas madre:\n")
+
+categoria_buscada = 'tarjetas madre'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+
+print("\n5 menos vendidos en la categoria memorias usb:\n")
+
+categoria_buscada = 'memorias usb'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+  
+ print("\n5 menos vendidos en la categoria pantallas:\n")
+
+categoria_buscada = 'pantallas'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas) 
+
+print("\n5 menos vendidos en la categoria bocinas:\n")
+
+categoria_buscada = 'bocinas'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas) 
+
+print("\n5 menos vendidos en la categoria audifonos:\n")
+
+categoria_buscada = 'audifonos'
+
+categoria_discos_duros = []
+productos_en_categoria = []
+
+for producto in lifestore_products:
+  cat_prod = producto[3]
+  if cat_prod == categoria_buscada:
+    categoria_discos_duros.append(producto)
+for id in categoria_discos_duros:
+ productos = id[0]
+ productos_en_categoria.append(productos)
+
+suma =[]
+
+for n in productos_en_categoria:
+  conteo = productos_vendidos.count(n)
+  suma.append(conteo)
+
+ventas_id = list(zip(suma,productos_en_categoria))
+
+ventas_id.sort()
+
+menos_vendidos = ventas_id [0:5]
+
+for n in range(len(menos_vendidos)):
+ id_producto = menos_vendidos [n][1]
+ nombre_producto = lifestore_products[id_producto - 1][1]
+ ventas = menos_vendidos [n][0]
+ print(nombre_producto [:45] ,",", "ventas:", ventas)
+
+
+
+
+
+
